@@ -36,9 +36,9 @@ export default function ContactForm() {
   }
 
   return (
-    <section ref={ref} className="px-6 md:px-16 py-24">
+    <section ref={ref} className="px-4 sm:px-6 md:px-16 py-16 md:py-24">
       <div className="max-w-6xl mx-auto">
-        <div className="grid md:grid-cols-2 gap-12">
+        <div className="grid md:grid-cols-2 gap-8 md:gap-12">
           {/* Contact Info */}
           <div className="space-y-8">
             <div className="reveal animate-slideUp">

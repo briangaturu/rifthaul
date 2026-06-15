@@ -13,7 +13,7 @@ export default function MarketplaceHero() {
   }, [])
 
   return (
-    <section className="relative min-h-[50vh] flex flex-col justify-center px-6 md:px-16 pt-32 pb-16 overflow-hidden">
+    <section className="relative min-h-[50vh] flex flex-col justify-center px-4 sm:px-6 md:px-16 pt-28 sm:pt-32 pb-12 sm:pb-16 overflow-hidden">
       {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-b from-[#111418] to-[#0D1117]" />
       <div
@@ -34,16 +34,16 @@ export default function MarketplaceHero() {
 
       {/* Content */}
       <div ref={ref} className="reveal relative z-20 max-w-3xl mx-auto text-center">
-        <div className="inline-flex items-center gap-2 bg-[#E8830A]/10 border border-[#E8830A]/30 text-[#E8830A] px-4 py-1.5 rounded-full text-xs font-bold tracking-widest uppercase mb-7">
+        <div className="inline-flex items-center gap-2 bg-[#E8830A]/10 border border-[#E8830A]/30 text-[#E8830A] px-3 sm:px-4 py-1.5 rounded-full text-xs font-bold tracking-widest uppercase mb-5 sm:mb-7">
           <span className="w-1.5 h-1.5 rounded-full bg-[#E8830A] animate-pulse" />
           Available Shipments
         </div>
 
-        <h1 className="font-display text-5xl md:text-6xl font-extrabold leading-none tracking-tight text-white mb-6">
+        <h1 className="font-display text-4xl sm:text-5xl md:text-6xl font-extrabold leading-none tracking-tight text-white mb-4 sm:mb-6 px-4">
           Find your next <span className="text-[#E8830A]">haul</span>
         </h1>
 
-        <p className="text-[#8A95A3] text-lg leading-relaxed max-w-2xl mx-auto">
+        <p className="text-[#8A95A3] text-base sm:text-lg leading-relaxed max-w-2xl mx-auto px-4">
           Browse active shipments across Kenya. Submit competitive quotes and grow your transport business.
         </p>
       </div>
