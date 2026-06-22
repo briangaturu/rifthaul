@@ -1,49 +1,60 @@
 import DashboardLayout from '../../components/dashboard/DashboardLayout'
 import StatCard from '../../components/dashboard/StatCard'
 import RecentActivity from '../../components/dashboard/RecentActivity'
+import { useGetAllTrucksQuery } from '../../features/api/truckApi'
+import { useGetAllShipmentsQuery } from '../../features/api/shipmentApi'
+import { useGetAllTransportersQuery, useGetAllBusinessesQuery } from '../../features/api/userApi'
 
 export default function AdminDashboard() {
+  const { data: shipments } = useGetAllShipmentsQuery(undefined)
+  const { data: trucks } = useGetAllTrucksQuery(undefined)
+  const { data: transporters } = useGetAllTransportersQuery(undefined)
+  const { data: businesses } = useGetAllBusinessesQuery(undefined)
+
+  const totalUsers = (transporters?.length ?? 0) + (businesses?.length ?? 0)
+  const activeShipments = shipments?.filter((s: any) => ['open', 'accepted', 'in_transit'].includes(s.status)).length ?? 0
+  const availableTrucks = trucks?.filter((t: any) => t.status === 'available').length ?? 0
+
   const stats = [
-    { icon: '👥', label: 'Total Users', value: '2,458', trend: { value: '15%', isPositive: true } },
-    { icon: '📦', label: 'Active Shipments', value: '156', trend: { value: '8%', isPositive: true } },
-    { icon: '🚛', label: 'Active Trucks', value: '342', trend: { value: '12%', isPositive: true } },
-    { icon: '💰', label: 'Platform Revenue', value: 'KES 12.5M', trend: { value: '28%', isPositive: true } },
+    {
+      icon: '👥',
+      label: 'Total Users',
+      value: totalUsers,
+      trend: { value: '15%', isPositive: true },
+    },
+    {
+      icon: '📦',
+      label: 'Active Shipments',
+      value: activeShipments,
+      trend: { value: '8%', isPositive: true },
+    },
+    {
+      icon: '🚛',
+      label: 'Available Trucks',
+      value: availableTrucks,
+      trend: { value: '12%', isPositive: true },
+    },
+    {
+      icon: '💰',
+      label: 'Platform Revenue',
+      value: 'KES 12.5M',
+      trend: { value: '28%', isPositive: true },
+    },
   ]
 
-  const activities = [
-    {
-      id: '1',
-      type: 'shipment' as const,
-      title: 'New User Registered',
-      description: 'Business account: Acme Supplies Ltd.',
-      time: '30 mins ago',
-      status: 'success' as const,
-    },
-    {
-      id: '2',
-      type: 'delivery' as const,
-      title: 'Shipment Completed',
-      description: 'SH-2847 - Nairobi to Mombasa',
-      time: '2 hours ago',
-      status: 'success' as const,
-    },
-    {
-      id: '3',
-      type: 'shipment' as const,
-      title: 'Dispute Opened',
-      description: 'SH-2835 - Payment issue reported',
-      time: '5 hours ago',
-      status: 'pending' as const,
-    },
-    {
-      id: '4',
-      type: 'payment' as const,
-      title: 'Payment Processed',
-      description: 'KES 85,000 for shipment SH-2840',
-      time: '1 day ago',
-      status: 'success' as const,
-    },
-  ]
+  // Build recent activity from latest shipments
+  const activities = (shipments ?? []).slice(0, 4).map((s: any) => ({
+    id: String(s.shipmentId),
+    type: 'shipment' as const,
+    title: `Shipment #${s.shipmentId}`,
+    description: `${s.origin} → ${s.destination} · ${s.cargoType}`,
+    time: new Date(s.createdAt).toLocaleDateString('en-KE', { day: 'numeric', month: 'short' }),
+    status: s.status === 'delivered'
+      ? 'success' as const
+      : s.status === 'cancelled'
+      ? 'failed' as const
+      : 'pending' as const,
+  }))
 
   return (
     <DashboardLayout userRole="admin">
@@ -66,7 +77,16 @@ export default function AdminDashboard() {
         {/* Recent Activity & System Stats */}
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <RecentActivity activities={activities} />
+            <RecentActivity activities={activities.length > 0 ? activities : [
+              {
+                id: '1',
+                type: 'shipment',
+                title: 'No recent activity',
+                description: 'Shipments will appear here once posted',
+                time: '',
+                status: 'pending',
+              }
+            ]} />
           </div>
 
           {/* System Overview */}
@@ -83,8 +103,12 @@ export default function AdminDashboard() {
                   <span className="text-green-400 text-sm font-semibold">● Healthy</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-[#8A95A3] text-sm">API Response</span>
-                  <span className="text-green-400 text-sm font-semibold">45ms</span>
+                  <span className="text-[#8A95A3] text-sm">Total Businesses</span>
+                  <span className="text-white text-sm font-semibold">{businesses?.length ?? 0}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[#8A95A3] text-sm">Total Transporters</span>
+                  <span className="text-white text-sm font-semibold">{transporters?.length ?? 0}</span>
                 </div>
               </div>
             </div>

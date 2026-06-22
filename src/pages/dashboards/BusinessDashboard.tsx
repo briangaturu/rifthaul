@@ -1,49 +1,66 @@
+import { useNavigate } from 'react-router-dom'
 import DashboardLayout from '../../components/dashboard/DashboardLayout'
 import StatCard from '../../components/dashboard/StatCard'
 import RecentActivity from '../../components/dashboard/RecentActivity'
+import { useGetMyShipmentsQuery } from '../../features/api/shipmentApi'
+import { useAppSelector } from '../../features/hooks'
 
 export default function BusinessDashboard() {
+  const navigate = useNavigate()
+  const { data: shipments, isLoading } = useGetMyShipmentsQuery(undefined)
+
+  const activeShipments = shipments?.filter((s: any) =>
+    ['open', 'accepted', 'in_transit'].includes(s.status)
+  ).length ?? 0
+
+  const completedShipments = shipments?.filter((s: any) =>
+    s.status === 'delivered'
+  ).length ?? 0
+
   const stats = [
-    { icon: '📦', label: 'Active Shipments', value: '8', trend: { value: '12%', isPositive: true } },
-    { icon: '✅', label: 'Completed', value: '47', trend: { value: '8%', isPositive: true } },
-    { icon: '💰', label: 'Pending Quotes', value: '5', trend: { value: '3%', isPositive: false } },
-    { icon: '💳', label: 'Total Spent', value: 'KES 2.4M', trend: { value: '15%', isPositive: true } },
+    {
+      icon: '📦',
+      label: 'Active Shipments',
+      value: isLoading ? '...' : activeShipments,
+      trend: { value: '12%', isPositive: true },
+    },
+    {
+      icon: '✅',
+      label: 'Completed',
+      value: isLoading ? '...' : completedShipments,
+      trend: { value: '8%', isPositive: true },
+    },
+    {
+      icon: '💰',
+      label: 'Total Shipments',
+      value: isLoading ? '...' : shipments?.length ?? 0,
+      trend: { value: '3%', isPositive: true },
+    },
+    {
+      icon: '💳',
+      label: 'Total Spent',
+      value: isLoading ? '...' : `KES ${(shipments ?? [])
+        .filter((s: any) => s.budget)
+        .reduce((sum: number, s: any) => sum + Number(s.budget), 0)
+        .toLocaleString()}`,
+      trend: { value: '15%', isPositive: true },
+    },
   ]
 
-  const activities = [
-    {
-      id: '1',
-      type: 'quote' as const,
-      title: 'New Quote Received',
-      description: 'For shipment SH-2847 from Nairobi to Mombasa',
-      time: '2 hours ago',
-      status: 'pending' as const,
-    },
-    {
-      id: '2',
-      type: 'delivery' as const,
-      title: 'Shipment Delivered',
-      description: 'SH-2839 successfully delivered to Kisumu',
-      time: '5 hours ago',
-      status: 'success' as const,
-    },
-    {
-      id: '3',
-      type: 'shipment' as const,
-      title: 'Shipment Posted',
-      description: 'SH-2850 - Construction materials to Nakuru',
-      time: '1 day ago',
-      status: 'success' as const,
-    },
-    {
-      id: '4',
-      type: 'payment' as const,
-      title: 'Payment Processed',
-      description: 'KES 45,000 for shipment SH-2838',
-      time: '2 days ago',
-      status: 'success' as const,
-    },
-  ]
+  const activities = (shipments ?? []).slice(0, 4).map((s: any) => ({
+    id: String(s.shipmentId),
+    type: s.status === 'delivered' ? 'delivery' as const : 'shipment' as const,
+    title: s.status === 'delivered'
+      ? `Shipment #${s.shipmentId} Delivered`
+      : `Shipment #${s.shipmentId} ${s.status.replace('_', ' ')}`,
+    description: `${s.origin} → ${s.destination} · ${s.cargoType}`,
+    time: new Date(s.createdAt).toLocaleDateString('en-KE', { day: 'numeric', month: 'short' }),
+    status: s.status === 'delivered'
+      ? 'success' as const
+      : s.status === 'cancelled'
+      ? 'failed' as const
+      : 'pending' as const,
+  }))
 
   return (
     <DashboardLayout userRole="business">
@@ -66,21 +83,39 @@ export default function BusinessDashboard() {
         {/* Recent Activity & Quick Actions */}
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <RecentActivity activities={activities} />
+            <RecentActivity activities={activities.length > 0 ? activities : [
+              {
+                id: '1',
+                type: 'shipment' as const,
+                title: 'No activity yet',
+                description: 'Post your first shipment to get started',
+                time: '',
+                status: 'pending' as const,
+              }
+            ]} />
           </div>
 
           {/* Quick Actions */}
           <div className="bg-[#1C2128] border border-white/5 rounded-xl p-6">
             <h3 className="font-display text-xl font-bold text-white mb-4">Quick Actions</h3>
             <div className="space-y-3">
-              <button className="w-full bg-[#E8830A] hover:bg-[#F5A030] text-[#111418] font-semibold text-sm py-3 rounded-lg transition-all hover:-translate-y-0.5">
+              <button
+                onClick={() => navigate('/dashboard/business/new-shipment')}
+                className="w-full bg-[#E8830A] hover:bg-[#F5A030] text-[#111418] font-semibold text-sm py-3 rounded-lg transition-all hover:-translate-y-0.5"
+              >
                 Post New Shipment
               </button>
-              <button className="w-full border border-white/15 hover:border-white/40 text-white font-semibold text-sm py-3 rounded-lg transition-all">
-                View All Quotes
+              <button
+                onClick={() => navigate('/dashboard/business/shipments')}
+                className="w-full border border-white/15 hover:border-white/40 text-white font-semibold text-sm py-3 rounded-lg transition-all"
+              >
+                View All Shipments
               </button>
-              <button className="w-full border border-white/15 hover:border-white/40 text-white font-semibold text-sm py-3 rounded-lg transition-all">
-                Track Shipments
+              <button
+                onClick={() => navigate('/marketplace')}
+                className="w-full border border-white/15 hover:border-white/40 text-white font-semibold text-sm py-3 rounded-lg transition-all"
+              >
+                Browse Trucks
               </button>
             </div>
           </div>

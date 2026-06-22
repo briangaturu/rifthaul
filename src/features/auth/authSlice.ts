@@ -9,7 +9,7 @@ interface AuthState {
 
 const storedAuth = localStorage.getItem('riftHaulAuth');
 const initialState: AuthState = storedAuth
-  ? JSON.parse(storedAuth)
+  ? (JSON.parse(storedAuth) as AuthState)
   : { token: null, userId: null, email: null, userType: null };
 
 const authSlice = createSlice({

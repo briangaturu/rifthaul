@@ -1,31 +1,44 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import DashboardLayout from '../../components/dashboard/DashboardLayout'
+import { useCreateShipmentMutation } from '../../features/api/shipmentApi'
 
 export default function PostShipment() {
   const navigate = useNavigate()
+  const [createShipment, { isLoading }] = useCreateShipmentMutation()
+  const [error, setError] = useState('')
+
   const [formData, setFormData] = useState({
-    title: '',
     cargoType: '',
-    weight: '',
+    weightTonnes: '',
     pickupLocation: '',
     deliveryLocation: '',
     pickupDate: '',
-    deliveryDeadline: '',
     budget: '',
-    description: '',
   })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Submit to backend
-    console.log('Shipment data:', formData)
-    alert('Shipment posted successfully!')
-    navigate('/dashboard/business/shipments')
+    setError('')
+
+    try {
+      await createShipment({
+        cargoType: formData.cargoType,
+        weightTonnes: Number(formData.weightTonnes),
+        origin: formData.pickupLocation,
+        destination: formData.deliveryLocation,
+        pickupDate: new Date(formData.pickupDate).toISOString(),
+        budget: formData.budget ? Number(formData.budget) : undefined,
+      }).unwrap()
+
+      navigate('/dashboard/business/shipments')
+    } catch (err: any) {
+      setError(err?.data?.error?.[0]?.message || err?.data?.error || 'Failed to post shipment. Please try again.')
+    }
   }
 
   return (
@@ -42,21 +55,15 @@ export default function PostShipment() {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="bg-[#1C2128] border border-white/5 rounded-xl p-6 md:p-8">
+
+            {error && (
+              <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm rounded-lg px-4 py-3 mb-6">
+                {error}
+              </div>
+            )}
+
             <div className="space-y-6">
               <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-white text-sm font-semibold mb-2">Shipment Title</label>
-                  <input
-                    type="text"
-                    name="title"
-                    value={formData.title}
-                    onChange={handleChange}
-                    placeholder="e.g., Construction Materials"
-                    required
-                    className="w-full bg-[#0D1117] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-[#8A95A3] focus:outline-none focus:border-[#E8830A]/50 transition-colors"
-                  />
-                </div>
-
                 <div>
                   <label className="block text-white text-sm font-semibold mb-2">Cargo Type</label>
                   <select
@@ -75,34 +82,18 @@ export default function PostShipment() {
                     <option value="Electronics">Electronics</option>
                   </select>
                 </div>
-              </div>
 
-              <div className="grid md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-white text-sm font-semibold mb-2">Weight (tonnes)</label>
                   <input
                     type="number"
-                    name="weight"
-                    value={formData.weight}
+                    name="weightTonnes"
+                    value={formData.weightTonnes}
                     onChange={handleChange}
                     placeholder="e.g., 15"
                     required
                     min="0"
                     step="0.1"
-                    className="w-full bg-[#0D1117] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-[#8A95A3] focus:outline-none focus:border-[#E8830A]/50 transition-colors"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-white text-sm font-semibold mb-2">Budget (KES)</label>
-                  <input
-                    type="number"
-                    name="budget"
-                    value={formData.budget}
-                    onChange={handleChange}
-                    placeholder="e.g., 45000"
-                    required
-                    min="0"
                     className="w-full bg-[#0D1117] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-[#8A95A3] focus:outline-none focus:border-[#E8830A]/50 transition-colors"
                   />
                 </div>
@@ -150,36 +141,26 @@ export default function PostShipment() {
                 </div>
 
                 <div>
-                  <label className="block text-white text-sm font-semibold mb-2">Delivery Deadline</label>
+                  <label className="block text-white text-sm font-semibold mb-2">Budget (KES)</label>
                   <input
-                    type="date"
-                    name="deliveryDeadline"
-                    value={formData.deliveryDeadline}
+                    type="number"
+                    name="budget"
+                    value={formData.budget}
                     onChange={handleChange}
-                    required
-                    className="w-full bg-[#0D1117] border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#E8830A]/50 transition-colors"
+                    placeholder="e.g., 45000"
+                    min="0"
+                    className="w-full bg-[#0D1117] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-[#8A95A3] focus:outline-none focus:border-[#E8830A]/50 transition-colors"
                   />
                 </div>
-              </div>
-
-              <div>
-                <label className="block text-white text-sm font-semibold mb-2">Description</label>
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleChange}
-                  placeholder="Additional details about your shipment..."
-                  rows={4}
-                  className="w-full bg-[#0D1117] border border-white/10 rounded-lg px-4 py-3 text-white placeholder-[#8A95A3] focus:outline-none focus:border-[#E8830A]/50 transition-colors resize-none"
-                />
               </div>
 
               <div className="flex gap-4 pt-4">
                 <button
                   type="submit"
-                  className="flex-1 bg-[#E8830A] hover:bg-[#F5A030] text-[#111418] font-bold text-sm py-3 rounded-lg transition-all hover:-translate-y-0.5"
+                  disabled={isLoading}
+                  className="flex-1 bg-[#E8830A] hover:bg-[#F5A030] disabled:opacity-50 disabled:cursor-not-allowed text-[#111418] font-bold text-sm py-3 rounded-lg transition-all hover:not-disabled:-translate-y-0.5"
                 >
-                  Post Shipment
+                  {isLoading ? 'Posting...' : 'Post Shipment'}
                 </button>
                 <button
                   type="button"

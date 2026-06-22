@@ -1,5 +1,7 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { ReactNode } from 'react'
+import { type ReactNode } from 'react'
+import { useAppDispatch, useAppSelector } from '../../features/hooks'
+import { logout } from '../../features/auth/authSlice'
 
 interface DashboardLayoutProps {
   children: ReactNode
@@ -9,6 +11,8 @@ interface DashboardLayoutProps {
 export default function DashboardLayout({ children, userRole }: DashboardLayoutProps) {
   const location = useLocation()
   const navigate = useNavigate()
+  const dispatch = useAppDispatch()
+  const { email } = useAppSelector((state) => state.auth)
 
   const getNavItems = () => {
     switch (userRole) {
@@ -37,7 +41,7 @@ export default function DashboardLayout({ children, userRole }: DashboardLayoutP
   }
 
   const handleLogout = () => {
-    // Handle logout logic
+    dispatch(logout())
     navigate('/')
   }
 
@@ -75,11 +79,11 @@ export default function DashboardLayout({ children, userRole }: DashboardLayoutP
         {/* User Section */}
         <div className="p-4 border-t border-white/5">
           <div className="flex items-center gap-3 mb-3 px-2">
-            <div className="w-10 h-10 rounded-full bg-[#E8830A]/20 flex items-center justify-center text-[#E8830A] font-bold">
+            <div className="w-10 h-10 rounded-full bg-[#E8830A]/20 flex items-center justify-center text-[#E8830A] font-bold text-sm">
               {userRole === 'admin' ? 'A' : userRole === 'business' ? 'B' : 'T'}
             </div>
-            <div className="flex-1">
-              <p className="text-white text-sm font-semibold">User Name</p>
+            <div className="flex-1 min-w-0">
+              <p className="text-white text-sm font-semibold truncate">{email ?? 'User'}</p>
               <p className="text-[#8A95A3] text-xs capitalize">{userRole}</p>
             </div>
           </div>
