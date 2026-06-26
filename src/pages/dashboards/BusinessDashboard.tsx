@@ -3,7 +3,7 @@ import DashboardLayout from '../../components/dashboard/DashboardLayout'
 import StatCard from '../../components/dashboard/StatCard'
 import RecentActivity from '../../components/dashboard/RecentActivity'
 import { useGetMyShipmentsQuery } from '../../features/api/shipmentApi'
-import { useAppSelector } from '../../features/hooks'
+
 
 export default function BusinessDashboard() {
   const navigate = useNavigate()
@@ -63,8 +63,11 @@ export default function BusinessDashboard() {
   }))
 
   return (
+    
     <DashboardLayout userRole="business">
+      
       <div className="p-4 md:p-8">
+        
         {/* Header */}
         <div className="mb-8">
           <h1 className="font-display text-3xl md:text-4xl font-extrabold text-white mb-2">
