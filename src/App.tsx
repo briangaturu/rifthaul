@@ -13,7 +13,7 @@ import ManageShipments from './pages/dashboards/ManageShipments'
 import ManageTrucks from './pages/dashboards/ManageTrucks'
 import ManageUsers from './pages/dashboards/ManageUsers'
 import BusinessShipments from './pages/dashboards/BusinessShipments'
-import PostTruck from './pages/dashboards/PostTruck'
+import MyTrucks from './pages/dashboards/MyTrucks'
 
 
 export default function App() {
@@ -33,7 +33,7 @@ export default function App() {
 
       {/* Transporter Dashboard Routes */}
       <Route path="/dashboard/transporter" element={<TransporterDashboard />} />
-      <Route path="/dashboard/transporter/trucks" element={<PostTruck />} />
+      <Route path="/dashboard/transporter/trucks" element={<MyTrucks />} />
 
       {/* Admin Dashboard Routes */}
       <Route path="/dashboard/admin" element={<AdminDashboard />} />
