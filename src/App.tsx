@@ -14,7 +14,8 @@ import ManageTrucks from './pages/dashboards/ManageTrucks'
 import ManageUsers from './pages/dashboards/ManageUsers'
 import BusinessShipments from './pages/dashboards/BusinessShipments'
 import MyTrucks from './pages/dashboards/MyTrucks'
-
+import AvailableJobs from './pages/dashboards/AvailableJobs'
+import MyJobs from './pages/dashboards/MyJobs'
 
 export default function App() {
   return (
@@ -34,6 +35,8 @@ export default function App() {
       {/* Transporter Dashboard Routes */}
       <Route path="/dashboard/transporter" element={<TransporterDashboard />} />
       <Route path="/dashboard/transporter/trucks" element={<MyTrucks />} />
+      <Route path="/dashboard/transporter/jobs" element={<AvailableJobs />} />
+      <Route path="/dashboard/transporter/my-jobs" element={<MyJobs />} />
 
       {/* Admin Dashboard Routes */}
       <Route path="/dashboard/admin" element={<AdminDashboard />} />
