@@ -26,7 +26,8 @@ const formatDate = (date: string) =>
 
 export default function ShipmentList() {
   const navigate = useNavigate()
-  const { data: shipments, isLoading, isError } = useGetAllShipmentsQuery(undefined)
+  const { data: allShipments, isLoading, isError } = useGetAllShipmentsQuery(undefined)
+  const shipments = allShipments?.filter((s: any) => s.status === 'open')
   const { data: trucks } = useGetMyTrucksQuery(undefined)
   const [updateShipmentStatus] = useUpdateShipmentStatusMutation()
   const { token, userId, userType } = useAppSelector((state) => state.auth)
@@ -118,8 +119,8 @@ export default function ShipmentList() {
     return (
       <div className="text-center py-20">
         <p className="text-4xl mb-4">📦</p>
-        <p className="font-display text-xl font-bold text-white mb-2">No shipments yet</p>
-        <p className="text-[#8A95A3] text-sm">Be the first to post a shipment</p>
+        <p className="font-display text-xl font-bold text-white mb-2">No open shipments right now</p>
+        <p className="text-[#8A95A3] text-sm">Check back soon — businesses are posting shipments daily</p>
       </div>
     )
   }
@@ -183,20 +184,13 @@ export default function ShipmentList() {
                 >
                   View Load
                 </button>
-                {shipment.status === 'open' && (
-                  <button
-                    onClick={() => handleApply(shipment)}
-                    disabled={applyingId === shipment.shipmentId}
-                    className="flex-1 bg-[#E8830A] hover:bg-[#F5A030] disabled:opacity-50 disabled:cursor-not-allowed text-[#111418] font-bold text-xs px-4 py-2.5 rounded-lg transition-all hover:-translate-y-0.5"
-                  >
-                    {applyingId === shipment.shipmentId ? 'Applying...' : 'Apply'}
-                  </button>
-                )}
-                {shipment.status !== 'open' && (
-                  <span className="flex-1 text-center text-[#8A95A3] text-xs px-4 py-2.5 rounded-lg border border-white/5">
-                    {formatStatus(shipment.status)}
-                  </span>
-                )}
+                <button
+                  onClick={() => handleApply(shipment)}
+                  disabled={applyingId === shipment.shipmentId}
+                  className="flex-1 bg-[#E8830A] hover:bg-[#F5A030] disabled:opacity-50 disabled:cursor-not-allowed text-[#111418] font-bold text-xs px-4 py-2.5 rounded-lg transition-all hover:-translate-y-0.5"
+                >
+                  {applyingId === shipment.shipmentId ? 'Applying...' : 'Apply'}
+                </button>
               </div>
             </div>
           </div>
